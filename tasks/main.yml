@@ -1,15 +1,35 @@
 ---
-- shell: 'keytool -list -keystore {{java_certificate_ca_path}} -storepass {{java_certificate_store_pass}} -noprompt -alias {{java_certificate_alias}}'
-  name: 'java-certificate | check if already imported'
-  ignore_errors: true
-  register: java_cert_imported
-
-- shell: "echo -n | openssl s_client -connect {{java_certificate_host}}:{{java_certificate_port}} | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/{{java_certificate_alias}}.crt"
-  name: 'java-certificate | download certificate'
-  args:
-    creates: " /tmp/{{java_certificate_alias}}.crt"
-  when: java_cert_imported|failed
-
-- shell: 'keytool -import -trustcacerts -keystore {{java_certificate_ca_path}} -storepass {{java_certificate_store_pass}} -noprompt -alias {{java_certificate_alias}} -file /tmp/{{java_certificate_alias}}.crt'
-  name: 'java-certificate | import certificate'
-  when: java_cert_imported|failed
+  vars:
+    java_certificate_host: example.com
+    java_certificate_port: 443
+    java_certificate_alias: '{{java_certificate_host}}'
+    java_certificate_ca_path: /usr/lib/jvm/default-java/jre/lib/security/cacerts
+    java_certificate_store_pass: changeit
+    java_keystore_path: ./keystore.jks
+  tasks:
+    - stat:
+        path: "{{ java_keystore_path }}"
+      register: keystore
+    - name: Debug
+      debug:
+        var: keystore
+    #- name: Install the unzip command
+    #  yum:
+    #    name: "unzip"
+    #    state: latest
+    #  tags:
+    #    - glassfish
+    #- shell: 'keytool -list -keystore {{java_certificate_ca_path}} -storepass {{java_certificate_store_pass}} -noprompt -alias {{java_certificate_alias}}'
+    #  name: 'java-certificate | check if already imported'
+    #  ignore_errors: true
+    #  register: java_cert_imported
+    #
+    #- shell: "echo -n | openssl s_client -connect {{java_certificate_host}}:{{java_certificate_port}} | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/{{java_certificate_alias}}.crt"
+    #  name: 'java-certificate | download certificate'
+    #  args:
+    #    creates: " /tmp/{{java_certificate_alias}}.crt"
+    #  when: java_cert_imported|failed
+    #
+    #- shell: 'keytool -import -trustcacerts -keystore {{java_certificate_ca_path}} -storepass {{java_certificate_store_pass}} -noprompt -alias {{java_certificate_alias}} -file /tmp/{{java_certificate_alias}}.crt'
+    #  name: 'java-certificate | import certificate'
+    #  when: java_cert_imported|failed
