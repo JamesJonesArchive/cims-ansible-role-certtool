@@ -12,7 +12,7 @@
       register: keystore
     - name: Debug
       debug:
-        var: keystore
+        var: "{{ keystore }}"
     #- name: Install the unzip command
     #  yum:
     #    name: "unzip"
