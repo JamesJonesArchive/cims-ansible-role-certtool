@@ -42,6 +42,4 @@
 - name: create self-signed SSL cert
   command: openssl req -new -nodes -x509 -subj "/C=US/ST=Florida/L=Tampa/O=USF/CN={{ ansible_fqdn }}" -days 3650 -keyout /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.key -out /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.crt -extensions v3_ca
              creates=/etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.crt
-  notify:
-      - restart nginx
   when: not cstat.stat.exists
