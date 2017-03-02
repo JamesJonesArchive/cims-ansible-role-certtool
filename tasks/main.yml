@@ -1,15 +1,45 @@
 ---
-- shell: 'keytool -list -keystore {{java_certificate_ca_path}} -storepass {{java_certificate_store_pass}} -noprompt -alias {{java_certificate_alias}}'
-  name: 'java-certificate | check if already imported'
-  ignore_errors: true
-  register: java_cert_imported
-
-- shell: "echo -n | openssl s_client -connect {{java_certificate_host}}:{{java_certificate_port}} | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/{{java_certificate_alias}}.crt"
-  name: 'java-certificate | download certificate'
+- name: Create strong Diffie-Hellman secret (LogJam attack)
+  command: openssl dhparam -out dhparam.pem 2048
+           creates=/etc/pki/tls/certs/dhparam.pem
   args:
-    creates: " /tmp/{{java_certificate_alias}}.crt"
-  when: java_cert_imported|failed
-
-- shell: 'keytool -import -trustcacerts -keystore {{java_certificate_ca_path}} -storepass {{java_certificate_store_pass}} -noprompt -alias {{java_certificate_alias}} -file /tmp/{{java_certificate_alias}}.crt'
-  name: 'java-certificate | import certificate'
-  when: java_cert_imported|failed
+    chdir: /etc/pki/tls/certs
+- name: "Check for certs existing for this host"     
+  stat: 
+    path: "{{ role_path}}/files/certs/{{ ansible_hostname }}"
+  register: cstat
+- name: "remove files and directories"
+  file:
+    state: "{{ item }}"
+    path: "/tmp/certs/"
+  with_items:
+    - absent
+    - directory
+  when: cstat.stat.exists
+- name: Copy over the certs
+  copy:
+    src: "{{ role_path}}/files/certs/{{ ansible_hostname }}/{{ item }}"
+    dest: "/tmp/certs/{{ item }}"
+  with_items:
+    - private.pem.des
+    - public.cer
+    - cacerts.cer    
+  when: cstat.stat.exists
+- name: Merge public and intermediate certs into one cert
+  shell: "{{ item }}"
+  with_items:
+    - sed -i -e '$a\' /tmp/certs/public.cer
+    - "cat /tmp/certs/public.cer /tmp/certs/cacerts.cer > /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.crt"
+  when: cstat.stat.exists
+- name: Decrypt certificate key
+  shell: "openssl rsa -in /tmp/certs/private.pem.des -out /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.key -passin pass:{{ image_cert_key_unlock | quote }}"
+  args:
+    chdir: /etc/pki/tls/certs
+  when: cstat.stat.exists
+### Create a self-signed certificate (Vagrant VMs only)
+- name: create self-signed SSL cert
+  command: openssl req -new -nodes -x509 -subj "/C=US/ST=Florida/L=Tampa/O=USF/CN={{ ansible_fqdn }}" -days 3650 -keyout /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.key -out /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.crt -extensions v3_ca
+             creates=/etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.crt
+  notify:
+      - restart nginx
+  when: not cstat.stat.exists
