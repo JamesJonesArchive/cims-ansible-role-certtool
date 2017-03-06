@@ -34,7 +34,7 @@
     - "cat /tmp/certs/public.cer /tmp/certs/cacerts.cer > /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.crt"
   when: cstat.stat.exists
 - name: Decrypt certificate key
-  shell: "openssl rsa -in /tmp/certs/private.pem.des -out /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.key -passin pass:{{ cert_key_unlock | quote }}"
+  shell: "openssl rsa -in /tmp/certs/private.pem.des -out /etc/pki/tls/private/{{ ansible_fqdn | replace('.', '_') }}.key -passin pass:{{ cert_key_unlock | quote }}"
   args:
     chdir: /etc/pki/tls/certs
   when: cstat.stat.exists
