@@ -36,7 +36,7 @@
 - name: Decrypt certificate key
   shell: "openssl rsa -in /tmp/certs/private.pem.des -out /etc/pki/tls/private/{{ ansible_fqdn | replace('.', '_') }}.key -passin pass:{{ cert_key_unlock | quote }}"
   args:
-    chdir: /etc/pki/tls/certs
+    chdir: /etc/pki/tls/private
   when: cstat.stat.exists
 ### Create a self-signed certificate (Vagrant VMs only)
 - name: create self-signed SSL cert
