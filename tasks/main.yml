@@ -40,6 +40,9 @@
   when: cstat.stat.exists
 ### Create a self-signed certificate (Vagrant VMs only)
 - name: create self-signed SSL cert
-  command: openssl req -new -nodes -x509 -subj "/C=US/ST=Florida/L=Tampa/O=USF/CN={{ ansible_fqdn }}" -days 3650 -keyout /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.key -out /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.crt -extensions v3_ca
+  command: openssl req -new -nodes -x509 -subj "/C=US/ST=Florida/L=Tampa/O=USF/CN={{ ansible_fqdn }}" -days 3650 -keyout /etc/pki/tls/private/{{ ansible_fqdn | replace('.', '_') }}.key -out /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.crt -extensions v3_ca
              creates=/etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.crt
   when: not cstat.stat.exists
+- file:
+    path: "/etc/pki/tls/private/{{ ansible_fqdn | replace('.', '_') }}.key"
+    mode: 0600
