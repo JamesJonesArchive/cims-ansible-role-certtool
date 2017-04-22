@@ -6,10 +6,11 @@
            creates=/etc/pki/tls/certs/dhparam.pem
   args:
     chdir: /etc/pki/tls/certs
-- name: "Check for certs existing for this host"     
+- name: "Check for certs existing for this host"
   stat: 
     path: "{{ role_path}}/files/certs/{{ inventory_hostname_short }}"
   register: cstat
+  delegate_to: 127.0.0.1
 - name: debug the cstat
   debug:
     msg: "{{ cstat }}"
