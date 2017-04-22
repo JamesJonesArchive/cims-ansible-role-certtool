@@ -26,12 +26,6 @@
   stat: 
     path: "/tmp/certs/public.cer"
   register: cstat
-- name: debug the cstat
-  debug:
-    msg: "{{ cstat }}"
-- name: debug the path
-  debug:
-    msg: "{{ role_path}}/files/certs/{{ inventory_hostname_short }}"
 - name: Merge public and intermediate certs into one cert
   shell: "{{ item }}"
   with_items:
