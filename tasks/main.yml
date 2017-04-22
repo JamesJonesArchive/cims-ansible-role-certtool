@@ -8,7 +8,7 @@
     chdir: /etc/pki/tls/certs
 - name: "Check for certs existing for this host"     
   stat: 
-    path: "{{ role_path}}/files/certs/{{ ansible_hostname }}"
+    path: "{{ role_path}}/files/certs/{{ inventory_hostname_short }}"
   register: cstat
 - name: debug the cstat
   debug:
