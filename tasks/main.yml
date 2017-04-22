@@ -6,15 +6,6 @@
            creates=/etc/pki/tls/certs/dhparam.pem
   args:
     chdir: /etc/pki/tls/certs
-- name: "Check for certs existing for this host"
-  local_action: stat path={{ role_path}}/files/certs/{{ inventory_hostname_short }}
-  register: cstat
-- name: debug the cstat
-  debug:
-    msg: "{{ cstat }}"
-- name: debug the path
-  debug:
-    msg: "{{ role_path}}/files/certs/{{ inventory_hostname_short }}"
 - name: "remove files and directories"
   file:
     state: "{{ item }}"
@@ -22,7 +13,6 @@
   with_items:
     - absent
     - directory
-  when: cstat.stat.exists|bool
 - name: Copy over the certs
   copy:
     src: "{{ role_path}}/files/certs/{{ ansible_hostname }}/{{ item }}"
@@ -30,8 +20,18 @@
   with_items:
     - private.pem.des
     - public.cer
-    - cacerts.cer    
-  when: cstat.stat.exists|bool
+    - cacerts.cer
+  ignore_errors: true
+- name: "Check for certs existing for this host"
+  stat: 
+    path: "/tmp/certs/public.cer"
+  register: cstat
+- name: debug the cstat
+  debug:
+    msg: "{{ cstat }}"
+- name: debug the path
+  debug:
+    msg: "{{ role_path}}/files/certs/{{ inventory_hostname_short }}"
 - name: Merge public and intermediate certs into one cert
   shell: "{{ item }}"
   with_items:
