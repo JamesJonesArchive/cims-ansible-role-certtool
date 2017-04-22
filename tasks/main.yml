@@ -10,6 +10,9 @@
   stat: 
     path: "{{ role_path}}/files/certs/{{ ansible_hostname }}"
   register: cstat
+- name: debug the cstat
+  debug:
+    msg: "{{ cstat }}"
 - name: "remove files and directories"
   file:
     state: "{{ item }}"
