@@ -15,7 +15,7 @@
     - directory
 - name: Copy over the certs
   copy:
-    src: "{{ role_path}}/files/certs/{{ ansible_hostname }}/{{ item }}"
+    src: "{{ playbook_dir }}/common/files/certs/{{ inventory_hostname_short }}/{{ item }}"
     dest: "/tmp/certs/{{ item }}"
   with_items:
     - private.pem.des
