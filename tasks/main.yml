@@ -13,6 +13,9 @@
 - name: debug the cstat
   debug:
     msg: "{{ cstat }}"
+- name: debug the path
+  debug:
+    msg: "{{ role_path}}/files/certs/{{ inventory_hostname_short }}"
 - name: "remove files and directories"
   file:
     state: "{{ item }}"
