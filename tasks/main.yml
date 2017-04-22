@@ -1,6 +1,6 @@
 ---
 - name: Get vars by env
-  include: getvars.yml
+  include: env_vars.yml
 - name: Create strong Diffie-Hellman secret (LogJam attack)
   command: openssl dhparam -out dhparam.pem 2048
            creates=/etc/pki/tls/certs/dhparam.pem

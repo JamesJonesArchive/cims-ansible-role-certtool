@@ -1,9 +1,0 @@
----
-- name: Include production variables
-  include_vars:
-    file: "{{ role_path }}/secure_vars/production.yml"
-  when: deploy_env == "Production"
-- name: Include development variables
-  include_vars:
-    file: "{{ role_path }}/secure_vars/development.yml"
-  when: deploy_env == "Development"
