@@ -17,7 +17,7 @@
   with_items:
     - absent
     - directory
-  when: cstat.stat.exists
+  when: cstat.stat.exists|bool
 - name: Copy over the certs
   copy:
     src: "{{ role_path}}/files/certs/{{ ansible_hostname }}/{{ item }}"
@@ -26,23 +26,23 @@
     - private.pem.des
     - public.cer
     - cacerts.cer    
-  when: cstat.stat.exists
+  when: cstat.stat.exists|bool
 - name: Merge public and intermediate certs into one cert
   shell: "{{ item }}"
   with_items:
     - sed -i -e '$a\' /tmp/certs/public.cer
     - "cat /tmp/certs/public.cer /tmp/certs/cacerts.cer > /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.crt"
-  when: cstat.stat.exists
+  when: cstat.stat.exists|bool
 - name: Decrypt certificate key
   shell: "openssl rsa -in /tmp/certs/private.pem.des -out /etc/pki/tls/private/{{ ansible_fqdn | replace('.', '_') }}.key -passin pass:{{ cert_key_unlock | quote }}"
   args:
     chdir: /etc/pki/tls/private
-  when: cstat.stat.exists
+  when: cstat.stat.exists|bool
 ### Create a self-signed certificate (Vagrant VMs only)
 - name: create self-signed SSL cert
   command: openssl req -new -nodes -x509 -subj "/C=US/ST=Florida/L=Tampa/O=USF/CN={{ ansible_fqdn }}" -days 3650 -keyout /etc/pki/tls/private/{{ ansible_fqdn | replace('.', '_') }}.key -out /etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.crt -extensions v3_ca
              creates=/etc/pki/tls/certs/{{ ansible_fqdn | replace('.', '_') }}.crt
-  when: not cstat.stat.exists
+  when: not cstat.stat.exists|bool
 - file:
     path: "/etc/pki/tls/private/{{ ansible_fqdn | replace('.', '_') }}.key"
     mode: 0600
