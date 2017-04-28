@@ -13,6 +13,9 @@
   with_items:
     - absent
     - directory
+- name: Show detected hostname
+  debug:
+    msg: "inventory_hostname_short={{ inventory_hostname_short }}"
 - name: Copy over the certs
   copy:
     src: "{{ playbook_dir }}/common/files/certs/{{ inventory_hostname_short }}/{{ item }}"
