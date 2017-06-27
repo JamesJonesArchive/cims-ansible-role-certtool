@@ -18,7 +18,7 @@
     msg: "inventory_hostname_short={{ inventory_hostname_short }}"
 - name: Copy over the certs
   copy:
-    src: "{{ playbook_dir }}/common/files/certs/{{ inventory_hostname_short }}/{{ item }}"
+    src: "{{ playbook_dir }}/roles/common/files/certs/{{ inventory_hostname_short }}/{{ item }}"
     dest: "/tmp/certs/{{ item }}"
   with_items:
     - private.pem.des
