@@ -28,7 +28,7 @@
   when: load_balancer_host is not defined
 - name: Copy over the certs
   copy:
-    src: "{{ playbook_dir }}/roles/common/files/certs/{{ load_balancer_host | splitext | first }}/{{ item }}"
+    src: "{{ playbook_dir }}/roles/common/files/certs/{{ load_balancer_host.split('.') | first }}/{{ item }}"
     dest: "/tmp/certs/{{ item }}"
   with_items:
     - private.pem.des
