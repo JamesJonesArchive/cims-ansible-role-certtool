@@ -15,7 +15,7 @@
     - directory
 - name: Show detected hostname
   debug:
-    msg: "inventory_hostname_short={{ inventory_hostname_short }}"
+    msg: "inventory_hostname_short={{ inventory_hostname_short }}"    
 - name: Copy over the certs
   copy:
     src: "{{ playbook_dir }}/roles/common/files/certs/{{ inventory_hostname_short }}/{{ item }}"
@@ -25,6 +25,17 @@
     - public.cer
     - cacerts.cer
   ignore_errors: true
+  when: load_balancer_host is not defined
+- name: Copy over the certs
+  copy:
+    src: "{{ playbook_dir }}/roles/common/files/certs/{{ load_balancer_host | splitext | first }}/{{ item }}"
+    dest: "/tmp/certs/{{ item }}"
+  with_items:
+    - private.pem.des
+    - public.cer
+    - cacerts.cer
+  ignore_errors: true
+  when: load_balancer_host is defined
 - name: "Check for certs existing for this host"
   stat: 
     path: "/tmp/certs/public.cer"
